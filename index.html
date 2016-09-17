@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Helicopter game</title>
+	<style>
+	canvas {
+		display: block;
+		position: absolute;
+		margin: auto;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+	}
+	</style>
+</head>
+<body>
+	<script>
+//------------s_unit objects------------------
+//constants
+var
+KEY_LEFT  = 37,
+KEY_UP    = 38,
+KEY_RIGHT = 39,
+KEY_DOWN  = 40,
+KEY_FIRE  = 32,
+CAM_LEFT  = 68,
+CAM_RIGHT = 65,
+CAM_UP    = 83,
+CAM_DOWN  = 87,
+KEY_M = 109,
+GAME_X=0,
+GAME_Y=0,
+WIDTH = 800,
+HEIGHT = 600,
+G_WIDTH=800,
+G_HEIGHT=600,
+VELOCITY=1,
+UP=-1,
+DOWN = 1,
+LEFT = 2,
+RIGHT = 3,
+frames = 0,
+keystate = {},
+// all objects massive
+allObjects=[],
+staticObjects=[];
+
+
+var s_helic=[], s_bg=[], s_rock=[], s_enemy=[], s_bullet;
+
+var level_1=['00000000ssss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ssss00000sss',
+						 'ss0000000sss',
+						 'ss000s000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 '0000e000e000',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ssssssse0000',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 '00000e000000',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss000ss00sss',
+						 'ss00ss000sss',
+						 'ss00s0000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 'ss0000000sss'
+						 ];
+
+
+//------------s_unit objects init-------------
+	function initSprites() {
+
+	var img = new Image();
+		img.src = "res/sprites3.png";
+
+
+	  s_helic = [
+	    new Sprite(img, 22, 36, 162, 44),
+	    new Sprite(img, 22, 82, 162, 44),
+	    new Sprite(img, 22, 126, 162, 44),
+	    new Sprite(img, 22, 168, 162, 44)
+	  ];
+  
+	  s_enemy = [
+	  	new Sprite(img,203,42,50,50)
+
+	  ];
+	  s_rock = [
+	  	new Sprite(img,207,98,50,50)
+	  ];
+	  s_bullet = [
+	  	new Sprite(img,210,110,8,4)
+	  ];
+
+	var img_bg = new Image();
+		img_bg.src = "res/back.png";
+
+	  s_bg= [
+	  	new Sprite(img_bg,1,1,1023,554)
+	  ];
+
+  };
+
+//------------Sprite object-------------------
+	function Sprite(img, x, y, width, height) {
+		this.img = img;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	};
+
+//------------Static_unit object--------------
+	function Static_unit(s_unit) {
+		this.x=0;
+		this.y=0;
+		this.width = s_unit[0].width;
+		this.height = s_unit[0].height;
+		this.rot=0;
+		this.s_unit = s_unit;
+		this.frame=0;
+		this.get = function () {return {x,y, rot}};
+		this.set = function (nx,ny, nrot){
+			this.x = nx; 
+			this.y = ny; 
+			this.rot = nrot;
+		};
+		this.draw = function(ctx) {
+		this.frame = frames%s_unit.length;
+			ctx.save();
+			ctx.drawImage(this.s_unit[this.frame].img, this.s_unit[this.frame].x, this.s_unit[this.frame].y, this.s_unit[this.frame].width, this.s_unit[this.frame].height,this.x, this.y, this.s_unit[this.frame].width, this.s_unit[this.frame].height);
+			ctx.restore();
+
+		};
+		this.update = function () {};
+		this.destruct = function () {};
+	}
+
+//------------Moving unit object --------------
+	function Moving_unit(s_unit, direction, velocity) {
+		//------inherits Static_unit-----
+		Static_unit.apply(this, arguments);
+		
+		this.direction = direction||UP;
+		this.velocity = velocity||3;
+		this.upBorder=GAME_Y;
+		this.downBorder=HEIGHT;
+
+		this.move = function (nx, ny) {
+			this.x = nx;
+			this.y = ny;
+		}
+
+		this.update = function (){
+			if (this.direction<2){
+				if (this.y>this.downBorder||this.y<this.upBorder) {this.direction*=-1}; 
+				this.y+=this.direction*this.velocity;
+			}
+			if (this.direction == RIGHT) {
+				this.x+=this.velocity;
+			}
+			if (this.direction == LEFT) {
+				this.x-=this.velocity;
+			}
+		};
+
+	}
+
+//------------Level object-----------------------
+	function Level (lvl, static_sprite, enemy_sprite, bg_sprite) {
+		this.step=50;
+		this.static_sprite=static_sprite;
+		this.enemy_sprite=enemy_sprite;
+		this.bg_sprite=bg_sprite;
+		this.lvl=lvl;
+		this.init = function(){
+			var bg = new Static_unit(this.bg_sprite);
+			staticObjects.push(bg);
+
+			for (var i=0; i<this.lvl.length; i++){
+				for (var j=this.lvl[i].length-1; j>=0; j--) {
+					if (this.lvl[i][j]=='s') {
+						var new_unit = new Static_unit(this.static_sprite);
+						new_unit.x = i*this.step;
+						new_unit.y = (this.lvl[i].length-1-j)*this.step;
+						allObjects.push(new_unit);
+					};
+					if (this.lvl[i][j]=='e') {
+						var new_unit = new Moving_unit(this.enemy_sprite);
+						new_unit.x = i*this.step;
+						new_unit.y = (this.lvl[i].length-1-j)*this.step;
+						//---find borders------
+						new_unit.upBorder = 0;
+						var q=j+1; while (this.lvl[i][q]=='0'){new_unit.upBorder++; q++}
+						new_unit.upBorder = new_unit.y + this.step - (new_unit.upBorder*this.step)
+						new_unit.downBorder = 0;
+						var q=j-1; while (this.lvl[i][q]=='0'){new_unit.downBorder++; q--}
+						new_unit.downBorder = new_unit.y + (new_unit.downBorder*this.step)
+
+						allObjects.push(new_unit);
+					}
+				}
+			}
+		};
+		this.update = function(){
+			
+		}
+
+
+	}
+
+//------------GAME FUNCTIONS -----------------------
+
+//-------------new game initialization---------
+function init () {
+
+
+
+//--------helicopter init--------------
+
+
+var helicopter = new Moving_unit(s_helic,0,0);
+helicopter.update = function (){
+	if (keystate[KEY_DOWN]) {
+		helicopter.y+=6};
+	if (keystate[KEY_UP]) {
+	helicopter.y-=6;
+	};
+if (keystate[KEY_RIGHT]) {
+		helicopter.x+=6};
+	if (keystate[KEY_LEFT]) {
+	helicopter.x-=6;
+	};
+	if (keystate[KEY_FIRE]) {
+	fire();
+	};
+	
+}
+allObjects.push(helicopter);
+
+// var bg = new Static_unit(s_bg);
+// 			allObjects.push(bg);
+//--------level init-----
+var level1 = new Level(level_1,s_rock, s_enemy, s_bg);
+level1.init();
+
+var bg = new Static_unit(s_bg);
+			staticObjects.push(bg);
+
+
+};
+
+//-------------update&check all game elements---------------
+function update () {
+	frames++;
+camera();
+	// update all objects
+	for (var i = 0; i < allObjects.length; i++) {
+		allObjects[i].update();
+		if (allObjects[i].name=='bullet' && allObjects[i].x >= G_WIDTH) {allObjects.splice(i,1)};
+	}
+	// moving forward
+
+	for(var i=1; i<allObjects.length; i++) {
+				allObjects[i].x-=VELOCITY;
+			}
+
+}
+
+//-------------draw all game elements----------------
+function render () {
+	// draw background color
+	ctx.fillRect(0, 0, G_WIDTH, G_HEIGHT);
+
+	// draw all objects
+		for (var i = 0; i < staticObjects.length; i++) {
+		staticObjects[i].draw(ctx);
+	};
+
+	for (var i = 1; i < allObjects.length; i++) {
+		allObjects[i].draw(ctx);
+	};
+	// draw helicopter above all
+allObjects[0].draw(ctx);
+}
+
+//----------------Game cycle--------------
+function loop () {
+	update();
+	render();
+	window.requestAnimationFrame(loop, canvas);
+};
+
+//----------------First start the game---------
+function run () {
+	// create and initiate the canvas element
+	canvas = document.createElement("canvas");
+	canvas.width = WIDTH;
+	canvas.height = HEIGHT;
+	ctx = canvas.getContext("2d");
+	// add the canvas element to the body of the document
+	canvas.style.border = "1px solid #000";
+	document.body.appendChild(canvas);
+		// keeps track of the keybourd input
+	document.addEventListener("keydown", function(evt) {
+		keystate[evt.keyCode] = true;
+		console.log(evt.keyCode);
+	});
+	document.addEventListener("keyup", function(evt) {
+		delete keystate[evt.keyCode];
+	});
+
+
+	
+
+
+	init();
+	loop();
+	
+
+
+}
+//--- helicopter fires
+function fire() {
+	var bullet = new Moving_unit(s_bullet, RIGHT, 10);
+	bullet.x = allObjects[0].x+ allObjects[0].width;
+	bullet.y = allObjects[0].y+0.5*allObjects[0].height;
+	bullet.name = 'bullet';
+	allObjects.push(bullet);
+}
+
+//---- camera in dev mode
+function camera() {
+	var xcam=0, ycam=0;
+	if (keystate[CAM_DOWN]) {
+		ycam =10
+	};
+	if (keystate[CAM_UP]) {
+		ycam=-10;
+	};
+	if (keystate[CAM_RIGHT]) {
+		xcam=10;
+	};
+	if (keystate[CAM_LEFT]) {
+		xcam=-10;
+	};
+	GAME_X+=xcam;
+	GAME_Y+=ycam;
+	HEIGHT +=ycam;
+	WIDTH+=xcam;
+	for(var i=0; i<allObjects.length; i++) {
+				allObjects[i].x+=xcam;
+				allObjects[i].y+=ycam;
+				allObjects[i].upBorder+=ycam;
+				allObjects[i].downBorder+=ycam;
+	};
+
+}
+
+
+
+initSprites();
+run();
+
+	</script>
+</body>
+</html>
