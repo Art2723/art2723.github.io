@@ -20,6 +20,8 @@
 //------------s_unit objects------------------
 //constants
 var
+ACTIVE = 1,
+DEAD = 0,
 KEY_LEFT  = 37,
 KEY_UP    = 38,
 KEY_RIGHT = 39,
@@ -134,6 +136,7 @@ var level_1=['00000000ssss',
 
 //------------Static_unit object--------------
 	function Static_unit(s_unit) {
+		this.flag = ACTIVE;
 		this.x=0;
 		this.y=0;
 		this.width = s_unit[0].width;
@@ -288,6 +291,13 @@ camera();
 				allObjects[i].x-=VELOCITY;
 			}
 
+collisionCheck();
+
+
+
+
+
+
 }
 
 //-------------draw all game elements----------------
@@ -327,12 +337,13 @@ function run () {
 		// keeps track of the keybourd input
 	document.addEventListener("keydown", function(evt) {
 		keystate[evt.keyCode] = true;
-		console.log(evt.keyCode);
+		//console.log(evt.keyCode);
 	});
 	document.addEventListener("keyup", function(evt) {
 		delete keystate[evt.keyCode];
 	});
-
+	evt1 = "touchstart";
+	document.addEventListener(evt1, touch);
 
 	
 
@@ -380,7 +391,71 @@ function camera() {
 
 }
 
+function collisionCheck () {
+	// check for helicopter collision
+			for(var i=1; i<allObjects.length; i++) {
+				if (allObjects[i].name !='bullet') {
+					if (allObjects[i].x > allObjects[0].x) {
+						if ((allObjects[i].x- allObjects[0].x)<allObjects[0].width) {
+							if (allObjects[i].y> allObjects[0].y) {
+								if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height) {
+									console.log('collision');
+								}
+							} else
+								if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height) {
+									console.log('collision');
+							}
+						}
+		  		} else
+			  		if ((allObjects[0].x- allObjects[i].x)<allObjects[i].width) {
+								if (allObjects[i].y> allObjects[0].y) {
+									if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height) {
+										console.log('collision');
+									}
+								} else
+									if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height) {
+										console.log('collision');
+								}
+					}
+				} else
+				for(var j=1; j<allObjects.length; j++) {
+					if (allObjects[j].name !='bullet') {
+						if ((allObjects[i].y>allObjects[j].y)&&(allObjects[i].y<(allObjects[j].y +allObjects[j].height))){
+								if ((allObjects[i].x > allObjects[j].x)&& ((allObjects[i].x - allObjects[j].x)< allObjects[j].width)) {
+										allObjects[j].flag=DEAD;
+										allObjects[i].flag=DEAD;
+											//console.log('SHOOT');
+								}
+						}
+					}
+				}
+			}
+	// check for bullet collision
 
+for(var j=allObjects.length-1; j>0; j--) {
+					if (allObjects[j].flag ==DEAD) {
+						allObjects.splice(j,1)
+					}
+}
+
+
+
+}
+
+function touch(evt) {
+
+	var mx = evt.offsetX, my = evt.offsetY;
+      if (mx == null || my == null) {
+        mx = evt.touches[0].clientX;
+        my = evt.touches[0].clientY;
+      }
+      // check if within
+      if (0 < mx && mx < G_WIDTH &&
+        0 < my && my < G_HEIGHT
+      ) {
+        fire();
+      }
+}
 
 initSprites();
 run();
