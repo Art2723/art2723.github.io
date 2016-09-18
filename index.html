@@ -463,9 +463,12 @@ function touch(evt) {
       ) {
         touchstate[DOWN] = true;
       }
-			if (widthTouch/2 < mx && mx < widthTouch &&
+			if ((widthTouch/2 < mx && mx < widthTouch &&
         0< my && my < heightTouch
-      ) {
+      )||(widthTouch/2 < evt.touches[1].clientX && evt.touches[1].clientX < widthTouch &&
+        0< evt.touches[1].clientY && evt.touches[1].clientY < heightTouch
+      ))
+       {
         touchstate[FIRE] = true;
       }
 }
