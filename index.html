@@ -22,6 +22,7 @@
 var
 ACTIVE = 1,
 DEAD = 0,
+CONST = 2,
 KEY_LEFT  = 37,
 KEY_UP    = 38,
 KEY_RIGHT = 39,
@@ -56,38 +57,62 @@ var s_helic=[], s_bg=[], s_rock=[], s_enemy=[], s_bullet;
 
 var level_1=['00000000ssss',
 						 'ss0000000sss',
-						 'ss0000000sss',
+						 'ss000000ssss',
 						 'ss0000000sss',
 						 'ssss00000sss',
 						 'ss0000000sss',
 						 'ss000s000sss',
+						 's00000000sss',
+						 'ss0000000sss',
+						 '0000e000000s',
 						 'ss0000000sss',
 						 'ss0000000sss',
-						 '0000e000e000',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
+						 'ss00000e0sss',
+						 's0000000000s',
 						 'ss0000000sss',
 						 'ss0000000sss',
 						 'ssssssse0000',
 						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
+						 'sss000000sss',
+						 'ss000000000s',
+						 's000000000ss',
+						 'ss0e00000sss',
 						 'ss0000000sss',
 						 '00000e000000',
 						 'ss0000000sss',
 						 'ss0000000sss',
+						 'sss000000sss',
+						 'ss000000000s',
 						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
+						 's00000000sss',
 						 'ss000ss00sss',
 						 'ss00ss000sss',
 						 'ss00s0000sss',
+						 's00000000sss',
+						 'ss000000000s',
 						 'ss0000000sss',
+						 '00000000ssss',
+						 'ss0000000sss',
+						 'ss000000s00s',
+						 'ss0000000sss',
+						 'ssss00000sss',
+						 'ss00000000ss',
+						 'ss000s000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 '0000e000000s',
+						 'ss0000000sss',
+						 'ss00000000ss',
+						 '00000000ssss',
+						 'ss0000000sss',
+						 'ss000000ssss',
+						 'ss0000000sss',
+						 'ssss000000ss',
+						 'ss0000000sss',
+						 'ss000s000sss',
+						 'ss0000000sss',
+						 'ss0000000sss',
+						 '0000e000000s',
 						 'ss0000000sss',
 						 'ss0000000sss'
 						 ];
@@ -124,6 +149,12 @@ var level_1=['00000000ssss',
 	  s_bg= [
 	  	new Sprite(img_bg,1,1,1023,554)
 	  ];
+	var img_end = new Image();
+		img_end.src = "res/Loser.jpg";
+
+	  s_end= [
+	  	new Sprite(img_end,1,1,393,303)
+	  ];
 
   };
 
@@ -138,7 +169,7 @@ var level_1=['00000000ssss',
 
 //------------Static_unit object--------------
 	function Static_unit(s_unit) {
-		this.flag = ACTIVE;
+		this.flag = CONST;
 		this.x=0;
 		this.y=0;
 		this.width = s_unit[0].width;
@@ -167,7 +198,7 @@ var level_1=['00000000ssss',
 	function Moving_unit(s_unit, direction, velocity) {
 		//------inherits Static_unit-----
 		Static_unit.apply(this, arguments);
-		
+		this.flag = ACTIVE;
 		this.direction = direction||UP;
 		this.velocity = velocity||3;
 		this.upBorder=GAME_Y;
@@ -241,7 +272,8 @@ var level_1=['00000000ssss',
 //-------------new game initialization---------
 function init () {
 
-
+allObjects=[];
+staticObjects=[];
 
 //--------helicopter init--------------
 
@@ -398,48 +430,57 @@ function collisionCheck () {
 			for(var i=1; i<allObjects.length; i++) {
 				if (allObjects[i].name !='bullet') {
 					if (allObjects[i].x > allObjects[0].x) {
-						if ((allObjects[i].x- allObjects[0].x)<allObjects[0].width) {
+						if ((allObjects[i].x- allObjects[0].x)<allObjects[0].width-5) {
 							if (allObjects[i].y> allObjects[0].y) {
-								if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height) {
-									console.log('collision');
+								if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height-5) {
+									heliDead();
 								}
 							} else
-								if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height) {
-									console.log('collision');
+								if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height-5) {
+									heliDead();
 							}
 						}
 		  		} else
-			  		if ((allObjects[0].x- allObjects[i].x)<allObjects[i].width) {
+			  		if ((allObjects[0].x- allObjects[i].x)<allObjects[i].width-5) {
 								if (allObjects[i].y> allObjects[0].y) {
-									if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height) {
-										console.log('collision');
+									if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height-5) {
+										heliDead();
 									}
 								} else
-									if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height) {
-										console.log('collision');
+									if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height-5) {
+										heliDead();
 								}
 					}
 				} else
+	// check for bullet collision
 				for(var j=1; j<allObjects.length; j++) {
 					if (allObjects[j].name !='bullet') {
 						if ((allObjects[i].y>allObjects[j].y)&&(allObjects[i].y<(allObjects[j].y +allObjects[j].height))){
 								if ((allObjects[i].x > allObjects[j].x)&& ((allObjects[i].x - allObjects[j].x)< allObjects[j].width)) {
-										allObjects[j].flag=DEAD;
 										allObjects[i].flag=DEAD;
+										if (allObjects[j].flag!=CONST) {allObjects[j].flag=DEAD;};
 											//console.log('SHOOT');
 								}
 						}
 					}
 				}
 			}
-	// check for bullet collision
-
+// delete all dead
 for(var j=allObjects.length-1; j>0; j--) {
 					if (allObjects[j].flag ==DEAD) {
 						allObjects.splice(j,1)
 					}
 }
 
+function heliDead(){
+var end = new Static_unit(s_end);
+end.x= 200;
+end.y = 180;
+
+	allObjects[0] = end;
+setTimeout(init,1000);
+
+	}
 
 
 }
