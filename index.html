@@ -454,17 +454,17 @@ function touch(evt) {
       if (0 < mx && mx < widthTouch/2 &&
         0 < my && my < heightTouch/2
       ) {
-        allObjects[0].y -=6;
+        allObjects[0].y -=6*evt.touches.lenght;
       }
 			if (0 < mx && mx < widthTouch/2 &&
         heightTouch/2< my && my < heightTouch
       ) {
-        allObjects[0].y +=6;
+        allObjects[0].y +=6*evt.touches.lenght;
       }
 			if (widthTouch/2 < mx && mx < widthTouch &&
         0< my && my < heightTouch
       ) {
-        fire();
+        fire()*evt.touches.lenght;
       }
 }
 
