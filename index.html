@@ -443,15 +443,26 @@ for(var j=allObjects.length-1; j>0; j--) {
 }
 
 function touch(evt) {
-
+	widthTouch = window.innerWidth;
+  heightTouch = window.innerHeight;
 	var mx = evt.offsetX, my = evt.offsetY;
       if (mx == null || my == null) {
         mx = evt.touches[0].clientX;
         my = evt.touches[0].clientY;
       }
-      // check if within
-      if (0 < mx && mx < G_WIDTH &&
-        0 < my && my < G_HEIGHT
+      // check 
+      if (0 < mx && mx < widthTouch/2 &&
+        0 < my && my < heightTouch/2
+      ) {
+        allObjects[0].y -=6;
+      }
+			if (0 < mx && mx < widthTouch/2 &&
+        heightTouch/2< my && my < heightTouch
+      ) {
+        allObjects[0].y +=6;
+      }
+			if (widthTouch/2 < mx && mx < widthTouch &&
+        0< my && my < heightTouch
       ) {
         fire();
       }
