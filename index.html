@@ -347,7 +347,7 @@ function run () {
 	var evt1= "touchstart";
 	document.addEventListener("touchstart", touch);
 	document.addEventListener("touchend", function() {
-		delete touchstate;
+		touchstate[UP]=false;touchstate[DOWN]=false;touchstate[FIRE]=false;
 	});
 
 	init();
