@@ -43,8 +43,10 @@ UP=-1,
 DOWN = 1,
 LEFT = 2,
 RIGHT = 3,
+FIRE = 4,
 frames = 0,
 keystate = {},
+touchstate = {},
 // all objects massive
 allObjects=[],
 staticObjects=[];
@@ -246,17 +248,17 @@ function init () {
 
 var helicopter = new Moving_unit(s_helic,0,0);
 helicopter.update = function (){
-	if (keystate[KEY_DOWN]) {
+	if (keystate[KEY_DOWN]||touchstate[DOWN]) {
 		helicopter.y+=6};
-	if (keystate[KEY_UP]) {
+	if (keystate[KEY_UP] ||touchstate[UP]) {
 	helicopter.y-=6;
 	};
-if (keystate[KEY_RIGHT]) {
+	if (keystate[KEY_RIGHT]) {
 		helicopter.x+=6};
 	if (keystate[KEY_LEFT]) {
 	helicopter.x-=6;
 	};
-	if (keystate[KEY_FIRE]) {
+	if (keystate[KEY_FIRE]||touchstate[FIRE]) {
 	fire();
 	};
 	
@@ -342,11 +344,11 @@ function run () {
 	document.addEventListener("keyup", function(evt) {
 		delete keystate[evt.keyCode];
 	});
-	evt1 = "touchstart";
-	document.addEventListener(evt1, touch);
-
-	
-
+	var evt1= "touchstart";
+	document.addEventListener("touchstart", touch);
+	document.addEventListener("touchend", function() {
+		delete touchstate;
+	});
 
 	init();
 	loop();
@@ -442,7 +444,7 @@ for(var j=allObjects.length-1; j>0; j--) {
 
 }
 
-function touch(evt) {
+function touch(evt1) {
 	widthTouch = window.innerWidth;
   heightTouch = window.innerHeight;
 	var mx = evt.offsetX, my = evt.offsetY;
@@ -454,17 +456,17 @@ function touch(evt) {
       if (0 < mx && mx < widthTouch/2 &&
         0 < my && my < heightTouch/2
       ) {
-        allObjects[0].y -=6*evt.touches.lenght;
+      	touchstate[UP] = true;
       }
 			if (0 < mx && mx < widthTouch/2 &&
         heightTouch/2< my && my < heightTouch
       ) {
-        allObjects[0].y +=6*evt.touches.lenght;
+        touchstate[DOWN] = true;
       }
 			if (widthTouch/2 < mx && mx < widthTouch &&
         0< my && my < heightTouch
       ) {
-        fire()*evt.touches.lenght;
+        touchstate[FIRE] = true;
       }
 }
 
