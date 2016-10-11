@@ -51,7 +51,9 @@ keystate = {},
 touchstate = {},
 // all objects massive
 allObjects=[],
-staticObjects=[];
+staticObjects=[],
+score,
+ammo;
 
 
 var s_helic=[], s_bg=[], s_rock=[], s_enemy=[], s_bullet, s_enemyExp;
@@ -358,7 +360,7 @@ return levelMap;
 		this.rot=0;
 		this.s_unit = s_unit;
 		this.frame=0;
-		this.frequency = this.s_unit.length;
+		//this.frequency = s_unit.length;
 		this.get = function () {return {x,y, rot}};
 		this.set = function (nx,ny, nrot){
 			this.x = nx; 
@@ -366,7 +368,8 @@ return levelMap;
 			this.rot = nrot;
 		};
 		this.draw = function(ctx) {
-		this.frame = frames%this.frequency;
+		this.frame = frames%s_unit.length;
+		// console.log(this.frame);
 			ctx.save();
 			ctx.drawImage(this.s_unit[this.frame].img, this.s_unit[this.frame].x, this.s_unit[this.frame].y, this.s_unit[this.frame].width, this.s_unit[this.frame].height,this.x, this.y, this.s_unit[this.frame].width, this.s_unit[this.frame].height);
 			ctx.restore();
@@ -472,7 +475,7 @@ return levelMap;
 						new_unit.downBorder = new_unit.y + (new_unit.downBorder*this.step)
 
 						allObjects.push(new_unit);}
-						if (this.lvl[i][j]=='f') {
+					if (this.lvl[i][j]=='f') {
 						var new_unit = new Moving_unit(this.enemy_sprite, LEFT);
 						new_unit.name = 'enemy';
 						new_unit.x = i*this.step;
@@ -497,6 +500,8 @@ function init () {
 frames =0;
 allObjects=[];
 staticObjects=[];
+score = 0;
+ammo=50;
 
 //--------helicopter init--------------
 
@@ -537,7 +542,7 @@ var bg = new Static_unit(s_bg);
 //-------------update&check all game elements---------------
 function update () {
 	frames++;
-camera();
+	camera();
 	// update all objects
 	for (var i = 0; i < allObjects.length; i++) {
 		allObjects[i].update();
@@ -549,7 +554,7 @@ camera();
 				allObjects[i].x-=VELOCITY;
 			}
 
-collisionCheck();
+	collisionCheck();
 
 
 
@@ -573,6 +578,13 @@ function render () {
 	};
 	// draw helicopter above all
 allObjects[0].draw(ctx);
+
+// score
+	ctx.save();
+	ctx.fillStyle = "#fff";
+	ctx.fillText("SCORE: " + score, 10, canvas.height-10);
+	ctx.fillText("AMMO: " + ammo, canvas.width-60, canvas.height-10);
+	ctx.restore();
 }
 
 //----------------Game cycle--------------
@@ -614,11 +626,14 @@ function run () {
 }
 //--- helicopter fires
 function fire() {
-	var bullet = new Moving_unit(s_bullet, RIGHT, 50);
-	bullet.x = allObjects[0].x+ allObjects[0].width;
-	bullet.y = allObjects[0].y+0.5*allObjects[0].height;
-	bullet.name = 'bullet';
-	allObjects.push(bullet);
+	if (ammo>0) {
+		var bullet = new Moving_unit(s_bullet, RIGHT, 50);
+		bullet.x = allObjects[0].x+ allObjects[0].width;
+		bullet.y = allObjects[0].y+0.5*allObjects[0].height;
+		bullet.name = 'bullet';
+		allObjects.push(bullet);
+		ammo -=1;
+	}
 }
 
 //---- camera in dev mode
@@ -676,6 +691,7 @@ function collisionCheck () {
 								}
 					}
 				} else
+				if (allObjects[i].name =='bullet') {
 	// check for bullet collision
 				for(var j=1; j<allObjects.length; j++) {
 					if (allObjects[j].name !='bullet' && allObjects[j].name !='sign') {
@@ -684,6 +700,7 @@ function collisionCheck () {
 										allObjects[i].flag=DEAD;
 										if (allObjects[j].flag!=CONST) {
 											allObjects[j].flag=DEAD;
+											score +=1;
 											if (allObjects[j].name == 'enemy') {
 												var expl_unit = new Sign_unit(s_enemyExp);
 												expl_unit.x = allObjects[j].x-37;
@@ -697,6 +714,7 @@ function collisionCheck () {
 					}
 				}
 			}
+			}
 // delete all dead
 for(var j=allObjects.length-1; j>0; j--) {
 					if (allObjects[j].flag ==DEAD) {
@@ -705,7 +723,7 @@ for(var j=allObjects.length-1; j>0; j--) {
 }
 
 function heliDead(){
-var end = new Static_unit(s_end);
+var end = new Sign_unit(s_end);
 end.x= 200;
 end.y = 180;
 
