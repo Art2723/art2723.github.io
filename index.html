@@ -70,9 +70,9 @@ var level_1=['ss000000ssss',
 						 'ss00e000000s',
 						 'ss0000000sss',
 						 'ss0000000sss',
-						 'ss00000e0sss',
+						 'ss0a000e0sss',
 						 's0000f00000s',
-						 'ss0000000sss',
+						 'ss000000asss',
 						 'ss0000000sss',
 						 'ss000sse0000',
 						 'ss0000000sss',
@@ -83,7 +83,7 @@ var level_1=['ss000000ssss',
 						 'ss0000000sss',
 						 'ss000e0000ss',
 						 'ss0000000sss',
-						 'ss0000000sss',
+						 'ss000a000sss',
 						 'sss0000f0sss',
 						 'ss000000000s',
 						 'ss0000000sss',
@@ -94,21 +94,21 @@ var level_1=['ss000000ssss',
 						 's00000000sss',
 						 'ss000000000s',
 						 'ss0000000sss',
-						 '00000000ssss',
+						 '000000a0ssss',
 						 'ss0000000sss',
 						 'ss000000s00s',
 						 'ss0000000sss',
 						 'ssss00000sss',
 						 'ss00000000ss',
 						 'ss000s000sss',
-						 'ss0000000sss',
+						 'ss00a0000sss',
 						 'ss0000000sss',
 						 '0000e000000s',
 						 'ss0000000sss',
 						 'ss00000000ss',
-						 '00000000ssss',
-						 'ss0000000sss',
-						 'ss000000ssss',
+						 '0000000assss',
+						 'ss0000a00sss',
+						 'ss000a00ssss',
 						 'ss0000000sss',
 						 'ssss000000ss',
 						 'ss0000000sss',
@@ -195,7 +195,7 @@ var level_1=['ss000000ssss',
 						 'ss0000f00sss',
 						 'ss000000ssss',
 						 'ss0000000sss',
-						 'ss0f00000sss',
+						 'ss0f00a00sss',
 						 'ss0000000sss',
 						 's00000000sss',
 						 'ss0000000sss',
@@ -209,24 +209,24 @@ var level_1=['ss000000ssss',
 						 'ss000sse0000',
 						 'ss0000000sss',
 						 'sss000000sss',
-						 'ss000f00000s',
+						 'ss00af00000s',
 						 's000000000ss',
 						 'ss0e00000sss',
 						 'ss0000000sss',
 						 'ss000e0000ss',
-						 'ss0000000sss',
+						 'ss000a000sss',
 						 'ss0000000sss',
 						 'sss0000f0sss',
 						 'ss000000000s',
 						 'ss0000000sss',
 						 's00000000sss',
-						 'ss000ss00sss',
+						 'ss000ssa0sss',
 						 'ss00ss000sss',
 						 'ss00s0000sss',
 						 's00000000sss',
 						 'ss000000000s',
 						 'ss0000000sss',
-						 '0000e000000s',
+						 '0000e00a000s',
 						 'ss0000000sss',
 						 'ss0000000sss'
 						 ];
@@ -339,6 +339,15 @@ return levelMap;
 	  	new Sprite(img_enemyExp, 259, 387, 122, 122),
 	  	new Sprite(img_enemyExp, 387, 387, 122, 122)
 	  ];
+
+	var img_ammo = new Image();
+		img_ammo.src = "res/ammo.png";
+
+	  s_ammo= [
+	  	new Sprite(img_ammo,1,1,56,32)
+	  ];
+
+
   };
 
 //------------Sprite object-------------------
@@ -443,7 +452,7 @@ return levelMap;
 
 
 //------------Level object-----------------------
-	function Level (lvl, static_sprite, enemy_sprite, bg_sprite) {
+	function Level (lvl, static_sprite, enemy_sprite, bg_sprite, ammo_sprite) {
 		this.step=50;
 		this.static_sprite=static_sprite;
 		this.enemy_sprite=enemy_sprite;
@@ -474,15 +483,24 @@ return levelMap;
 						var q=j-1; while (this.lvl[i][q]=='0'){new_unit.downBorder++; q--}
 						new_unit.downBorder = new_unit.y + (new_unit.downBorder*this.step)
 
-						allObjects.push(new_unit);}
+						allObjects.push(new_unit);
+					};
 					if (this.lvl[i][j]=='f') {
 						var new_unit = new Moving_unit(this.enemy_sprite, LEFT);
 						new_unit.name = 'enemy';
 						new_unit.x = i*this.step;
 						new_unit.y = (this.lvl[i].length-1-j)*this.step;
 						allObjects.push(new_unit);
+					};
+					if (this.lvl[i][j]=='a') {
+						var new_unit = new Static_unit(ammo_sprite, NODIRECTION, 3, 1000);
+						new_unit.name = 'ammo';
+						new_unit.x = i*this.step;
+						new_unit.y = (this.lvl[i].length-1-j)*this.step;
+						allObjects.push(new_unit);
+					};
 
-					}
+
 				}
 			}
 		};
@@ -530,7 +548,7 @@ allObjects.push(helicopter);
 // var bg = new Static_unit(s_bg);
 // 			allObjects.push(bg);
 //--------level init-----
-var level1 = new Level(level_1,s_rock, s_enemy, s_bg);
+var level1 = new Level(level_1,s_rock, s_enemy, s_bg, s_ammo);
 level1.init();
 
 var bg = new Static_unit(s_bg);
@@ -694,7 +712,7 @@ function collisionCheck () {
 				if (allObjects[i].name =='bullet') {
 	// check for bullet collision
 				for(var j=1; j<allObjects.length; j++) {
-					if (allObjects[j].name !='bullet' && allObjects[j].name !='sign') {
+					if (allObjects[j].name !='bullet' && allObjects[j].name !='sign'&& allObjects[j].name !='ammo') {
 						if ((allObjects[i].y>allObjects[j].y)&&(allObjects[i].y<(allObjects[j].y +allObjects[j].height))){
 								if ((allObjects[i].x > allObjects[j].x)&& ((allObjects[i].x - allObjects[j].x)< allObjects[j].width)) {
 										allObjects[i].flag=DEAD;
@@ -723,6 +741,11 @@ for(var j=allObjects.length-1; j>0; j--) {
 }
 
 function heliDead(){
+	if (allObjects[i].name=='ammo') {
+		allObjects[i].flag = DEAD;
+		ammo+=50;
+		return;
+	}
 var end = new Sign_unit(s_end);
 end.x= 200;
 end.y = 180;
