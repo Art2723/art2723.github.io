@@ -446,12 +446,12 @@ return levelMap;
 		this.downBorder=HEIGHT;
 		this.leftBorder = 0;
 		this.rightBorder = 0;
-		this.fire = 1;
-		this.trigger = {x:250,
-										f:0,
-										direction:RIGHT,
-										velocity:VELOCITY,
-										fire:1
+		this.fire = Math.random()>0.5?1:0;
+		this.trigger = {x:Math.random()>0.6?Math.round(Math.random()*300):0,
+										f:Math.random()>0.6?Math.round(Math.random()*1000):0,
+										direction:LEFT,
+										velocity:6,
+										fire:Math.random()>0.5?1:0
 										 }
 		this.update = function (){
 			//reverse if border touched
@@ -765,7 +765,7 @@ function fire() {
 }
 
 function enemyFire() {
-		var bullet = new Moving_unit(s_missile, 0,LEFT, 5);
+		var bullet = new Moving_unit(s_missile, 0,LEFT, 8);
 		bullet.x = this.x;
 		bullet.y = this.y+0.5*this.height;
 		bullet.name = 'enemyBullet';
