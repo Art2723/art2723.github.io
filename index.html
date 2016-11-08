@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Helicopter game</title>
-	<style>
-	canvas {
-		display: block;
-		position: absolute;
-		margin: auto;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-	}
-	</style>
+  <meta charset="UTF-8">
+  <title>Helicopter game</title>
+  <script src="res/levels.js"></script>
+  <style>
+  canvas {
+    display: block;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  </style>
 </head>
 <body>
-	<script>
+  <script>
 //------------s_unit objects------------------
 //constants
 var
+PLAY = 1,
+STARTMENU = 0,
+FINALMENU = 2,
+gameState = STARTMENU,
 ACTIVE = 1,
 DEAD = 0,
 CONST = 2,
@@ -39,7 +44,8 @@ WIDTH = 800,
 HEIGHT = 600,
 G_WIDTH=800,
 G_HEIGHT=600,
-VELOCITY=3,
+endCurrentLevel,
+VELOCITY=4,
 UP=-1,
 DOWN = 1,
 LEFT = 2,
@@ -54,547 +60,234 @@ touchstate = {},
 allObjects=[],
 staticObjects=[],
 score,
+best = localStorage.getItem("helicopterBest")|| 0,
 ammo;
 
 
-var s_helic=[], s_bg=[], s_rock=[], s_enemy=[], s_bullet, s_enemyExp;
-
-var level_1=['ss000000ssss',
-						 'ss0000000sss',
-						 'ss000000ssss',
-						 'ss0000000sss',
-						 'sss000000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 's00000000sss',
-						 'ss0000000sss',
-						 'ss00e000000s',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss0a000e0sss',
-						 's0000f00000s',
-						 'ss000000asss',
-						 'ss0000000sss',
-						 'ss00000e0000',
-						 'ss0000000sss',
-						 'sss000000sss',
-						 'ss000f00000s',
-						 's000000000ss',
-						 'ss0e00000sss',
-						 'ss0000000sss',
-						 'ss000e0000ss',
-						 'ss0000000sss',
-						 'ss000a000sss',
-						 'sss0000f0sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 's00000000sss',
-						 'ss000s000sss',
-						 'ss000s000sss',
-						 'ss00s0000sss',
-						 's00000000sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 '000000a0ssss',
-						 'ss0000000sss',
-						 'ss000000s00s',
-						 'ss0000000sss',
-						 'ssss00000sss',
-						 'ss00000000ss',
-						 'ss0000000sss',
-						 'ss00a0000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss0000000sss',
-						 'ss00000000ss',
-						 '0000000assss',
-						 'ss0000a00sss',
-						 'ss000a00ssss',
-						 'ss0000000sss',
-						 'ssss000000ss',
-						 'ss0000000sss',
-						 'ss000s000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss0000000sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 's00s0000ssss',
-						 'ss0000000sss',
-						 'ss000000s00s',
-						 'ss0000000sss',
-						 'ssss00000sss',
-						 'ss00000000ss',
-						 'ss000s000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss0000000sss',
-						 'ss00000000ss',
-						 '00000000ssss',
-						 'ss0000f00sss',
-						 'ss000000ssss',
-						 'ss0000000sss',
-						 'ssss000000ss',
-						 'ss0000000sss',
-						 'ss000s000sss',
-						 'sS0000000sss',
-						 'ss00000000ss',
-						 '00000000ssss',
-						 'ss0000000sss',
-						 'ss000000ssss',
-						 'ss0000000sss',
-						 'ssss000000ss',
-						 'ss0000000sss',
-						 'ss000s000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss000000ssss',
-						 'ss0000000sss',
-						 'ssss000000ss',
-						 'ss0000000sss',
-						 'ss000s000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss0000000sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 's00s0000ssss',
-						 'ss0000000sss',
-						 'ss000000s00s',
-						 'ss0000000sss',
-						 'ssss00000sss',
-						 'ss00000000ss',
-						 'ss000s000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss0000000sss',
-						 'ss00000000ss',
-						 '00000000ssss',
-						 'ss0000f00sss',
-						 'ss000000ssss',
-						 'ss0000000sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 's00s0000ssss',
-						 'ss0000000sss',
-						 'ss000000s00s',
-						 'ss0000000sss',
-						 'ssss00000sss',
-						 'ss00000000ss',
-						 'ss000s000sss',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 '0000e000000s',
-						 'ss0000000sss',
-						 'ss00000000ss',
-						 '00000000ssss',
-						 'ss0000f00sss',
-						 'ss000000ssss',
-						 'ss0000000sss',
-						 'ss0f00a00sss',
-						 'ss0000000sss',
-						 's00000000sss',
-						 'ss0000000sss',
-						 'ss00e000000s',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss00000e0sss',
-						 's0000f00000s',
-						 'ss0000000sss',
-						 'ss0000000sss',
-						 'ss000sse0000',
-						 'ss0000000sss',
-						 'sss000000sss',
-						 'ss00af00000s',
-						 's000000000ss',
-						 'ss0e00000sss',
-						 'ss0000000sss',
-						 'ss000e0000ss',
-						 'ss000a000sss',
-						 'ss0000000sss',
-						 'sss0000f0sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 's00000000sss',
-						 'ss000ssa0sss',
-						 'ss00ss000sss',
-						 'ss00s0000sss',
-						 's00000000sss',
-						 'ss000000000s',
-						 'ss0000000sss',
-						 '0000e00a000s',
-						 'ss0000000sss',
-						 'ss0000000sss'
-						 ];
-
-//    random Map variant
-function randomMap (lev, levLength) {
-	var levelMap=['ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss',
-								'ss00000000ss'
-								]; // map
-	levLength = levLength<100?100:levLength; // min 100
-	// level check
-	var minWindow;
-	switch (lev) {
-		case 0:
-			minWindow = '00000000';
-			break;
-		case 1:
-			minWindow = '0000000';
-			break;
-		case 2:
-			minWindow = '000000';
-			break;
-		case 3:
-			minWindow = '00000';
-			break;
-		case 4:
-			minWindow = '0000';
-			break;
-	}
-	//  build level
-	for (var i=10; i<levLength; i++) {
-		var str='';
-		for (var j=0; j<12; j++) {
-			str += Math.round(Math.random())==0?'s':'0';
-		}
-		// insert min window
-		var rand = Math.round(Math.random()*(minWindow.length-4));
-		str = str.slice(0,rand) + minWindow + str.slice(rand+minWindow.length);
-		// insert enemy
-		var rand = Math.round(Math.random()*(j=2));
-		str = Math.round(Math.random()+0.3)==0?str.slice(0,rand) + 'e' + str.slice(rand+2):str;
-		levelMap.push (str);
-	}
-return levelMap;
-}
-
-//var level_1 = randomMap(2,200);
-
-//------------s_unit objects init-------------
-	function initSprites() {
-
-	var img = new Image();
-		img.src = "res/sprites3.png";
-
-
-	  s_helic = [
-	    new Sprite(img, 22, 36, 162, 44),
-	    new Sprite(img, 22, 82, 162, 44),
-	    new Sprite(img, 22, 126, 162, 44),
-	    new Sprite(img, 22, 168, 162, 44)
-	  ];
-  
-	  s_enemy = [
-	  	new Sprite(img,202,42,112,36),
-			new Sprite(img,314,42,112,36),
-			new Sprite(img,426,42,112,36),
-			new Sprite(img,538,42,112,36)
-	  ];
-	  s_rock = [
-	  	new Sprite(img,207,98,50,50)
-	  ];
-	  s_missile = [
-	  	new Sprite(img,266,96,100,18)
-	  	//new Sprite(img,266,114,100,18)
-	  ];
-
-	var img_bg = new Image();
-		img_bg.src = "res/back.png";
-
-	  s_bg= [
-	  	new Sprite(img_bg,1,1,1023,554)
-	  ];
-	var img_end = new Image();
-		img_end.src = "res/Loser.jpg";
-
-	  s_end= [
-	  	new Sprite(img_end,1,1,393,303)
-	  ];
-	var img_enemyExp = new Image();
-		img_enemyExp.src = "res/explosion.png";
-
-	  s_enemyExp= [
-	  	new Sprite(img_enemyExp, 131, 3, 122, 122),
-	  	new Sprite(img_enemyExp, 259, 3, 122, 122),
-	  	new Sprite(img_enemyExp, 387, 3, 122, 122),
-	  	new Sprite(img_enemyExp, 2, 131, 122, 122),
-	  	new Sprite(img_enemyExp, 131, 131, 122, 122),
-	  	new Sprite(img_enemyExp, 259, 131, 122, 122),
-	  	new Sprite(img_enemyExp, 387, 131, 122, 122),
-	  	new Sprite(img_enemyExp, 2, 259, 122, 122),
-	  	new Sprite(img_enemyExp, 131, 259, 122, 122),
-	  	new Sprite(img_enemyExp, 259, 259, 122, 122),
-	  	new Sprite(img_enemyExp, 387, 259, 122, 122),
-	  	new Sprite(img_enemyExp, 2, 387, 122, 122),
-	  	new Sprite(img_enemyExp, 131, 387, 122, 122),
-	  	new Sprite(img_enemyExp, 259, 387, 122, 122),
-	  	new Sprite(img_enemyExp, 387, 387, 122, 122)
-	  ];
-		s_bullet = [
-	  	new Sprite(img_enemyExp,165,445,8,2)
-	  ];
-	var img_ammo = new Image();
-		img_ammo.src = "res/ammo.png";
-
-	  s_ammo= [
-	  	new Sprite(img_ammo,1,1,56,32)
-	  ];
-
-	var img_heliExp = new Image();
-		img_heliExp.src = "res/heli_explosion.png";
-
-	  s_heliExp= [
-	  	new Sprite(img_heliExp, 1, 1, 280, 176),
-	  	new Sprite(img_heliExp, 280, 1, 280, 176),
-	  	new Sprite(img_heliExp, 560, 1, 280, 176),
-	  	new Sprite(img_heliExp, 840, 1, 280, 176),
-	  	new Sprite(img_heliExp, 1, 176, 280, 176),
-	  	new Sprite(img_heliExp, 280, 176, 280, 176),
-	  	new Sprite(img_heliExp, 560, 176, 280, 176),
-	  	new Sprite(img_heliExp, 840, 176, 280, 176)
-	  ];
-  };
-
-//------------Sprite object-------------------
-	function Sprite(img, x, y, width, height) {
-		this.img = img;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	};
-
 //------------Static_unit object--------------
-	function Static_unit(s_unit) {
-		this.flag = CONST;
-		this.name = 'rock';
-		this.delay = 1;
-		this.x=0;
-		this.y=0;
-		this.width = s_unit[0].width;
-		this.height = s_unit[0].height;
-		this.rot=0;
-		this.s_unit = s_unit;
-		this.frame=0;
-		this._counter = 1;
-		this.draw = function(ctx) {
-			ctx.save();
-			ctx.drawImage(this.s_unit[this.frame].img, this.s_unit[this.frame].x, this.s_unit[this.frame].y, this.s_unit[this.frame].width, this.s_unit[this.frame].height,this.x, this.y, this.s_unit[this.frame].width, this.s_unit[this.frame].height);
-			ctx.restore();
-			// makes delay on each frame
-			if (this._counter%this.delay==0) {this.frame ++};
-			//  makes frame cycle
-			if (this.frame>=s_unit.length-1) {this.frame=0};
-		};
-		this.update = function () {this._counter++};
-	}
+  function Static_unit(s_unit) {
+    this.flag = CONST;
+    this.cost = 1;
+    this.name = 'rock';
+    this.delay = 1;
+    this.x=0;
+    this.y=0;
+    this.width = s_unit[0].width;
+    this.height = s_unit[0].height;
+    this.rot=0;
+    this.s_unit = s_unit;
+    this.frame=0;
+    this._counter = 1;
+    this.hp = 10;
+    this.draw = function(ctx) {
+      ctx.save();
+      ctx.drawImage(this.s_unit[this.frame].img, this.s_unit[this.frame].x, this.s_unit[this.frame].y, this.s_unit[this.frame].width, this.s_unit[this.frame].height,this.x, this.y, this.s_unit[this.frame].width, this.s_unit[this.frame].height);
+      ctx.restore();
+      // makes delay on each frame
+      if (this._counter%this.delay==0) {this.frame ++};
+      //  makes frame cycle
+      if (this.frame>=s_unit.length-1) {this.frame=0};
+    };
+    this.update = function () {this._counter++};
+    this.collision = function () {
+      this.hp -=1;
+      if (this.hp ==0) {
+        this.flag = DEAD;
+        score +=this.cost;
+        };
+    };
+  }
 
 //------------Moving unit object --------------
-	function Moving_unit(s_unit, lifetime, direction, velocity) {
-		//------inherits Static_unit-----
-		Static_unit.apply(this, arguments);
-		this.flag = ACTIVE;
-		this.direction = direction||NODIRECTION;
-		this.velocity = velocity||3;
-		this.liftime =lifetime||0;
-		this.update = function (){
-						// dye if time is out
-			if (this.liftime&&(this.liftime==this._counter)) {this.flag = DEAD};
-			//  move 
-			switch (this.direction) {
-				case NODIRECTION: 
-					break;
-				case UP:
-					this.y -= this.velocity;
-					break;
-				case DOWN:
-					this.y += this.velocity;
-					break;
-				case LEFT:
-					this.x -=this.velocity;
-					break;
-				case RIGHT:
-					this.x += this.velocity;
-			}
+  function Moving_unit(s_unit, lifetime, direction, velocity) {
+    //------inherits Static_unit-----
+    Static_unit.apply(this, arguments);
+    this.flag = ACTIVE;
+    this.direction = direction||NODIRECTION;
+    this.velocity = velocity||3;
+    this.liftime =lifetime||0;
+    this.update = function (){
+            // dye if time is out
+      if (this.liftime&&(this.liftime==this._counter)) {this.flag = DEAD};
+      //  move 
+      switch (this.direction) {
+        case NODIRECTION: 
+          break;
+        case UP:
+          this.y -= this.velocity;
+          break;
+        case DOWN:
+          this.y += this.velocity;
+          break;
+        case LEFT:
+          this.x -=this.velocity;
+          break;
+        case RIGHT:
+          this.x += this.velocity;
+      }
 
-			// lifetime counter
-			this._counter++;
+      // lifetime counter
+      this._counter++;
 
-		};
+    };
 
-	}
+  }
 
-	//------------Moving unit object --------------
-	function Enemy_unit(s_unit, lifetime, direction, velocity) {
-		//------inherits Moving_unit-----
-		Moving_unit.apply(this, arguments);
-		this.liftime =lifetime||0;
-		this.upBorder=GAME_Y;
-		this.downBorder=HEIGHT;
-		this.leftBorder = 0;
-		this.rightBorder = 0;
-		this.fire = Math.random()>0.5?1:0;
-		this.trigger = {x:Math.random()>0.6?Math.round(Math.random()*300):0,
-										f:Math.random()>0.6?Math.round(Math.random()*1000):0,
-										direction:LEFT,
-										velocity:6,
-										fire:Math.random()>0.5?1:0
-										 }
-		this.update = function (){
-			//reverse if border touched
-			if ((this.upBorder&&this.y<this.upBorder)||(this.downBorder&&this.y>this.downBorder)||(this.leftBorder&&this.x<this.leftBorder)||(this.rightBorder&&this.x>this.rightBorder)) {this.direction*=-1};
-			// dye if time is out
-			if (this.liftime&&(this.liftime==this._counter)) {this.flag = DEAD};
-			//  move 
-			switch (this.direction) {
-				case NODIRECTION: 
-					break;
-				case UP:
-					this.y -= this.velocity;
-					break;
-				case DOWN:
-					this.y += this.velocity;
-					break;
-				case LEFT:
-					this.x -=this.velocity;
-					break;
-				case RIGHT:
-					this.x += this.velocity;
-			}
+  //------------Enemy unit object --------------
+  function Enemy_unit(s_unit, lifetime, direction, velocity) {
+    //------inherits Moving_unit-----
+    Moving_unit.apply(this, arguments);
+    this.upBorder=GAME_Y;
+    this.downBorder=HEIGHT;
+    this.leftBorder = 0;
+    this.rightBorder = 0;
+    this.hp = 4;
+    this.fire = Math.random()>0.5?1:0;
+    this.trigger = {x:Math.random()>0.6?Math.round(Math.random()*300):0,
+                    f:Math.random()>0.6?Math.round(Math.random()*1000):0,
+                    direction:LEFT,
+                    velocity:6,
+                    fire:Math.random()>0.5?1:0
+                     }
+    var parentUpdate = this.update;//------inherits update-----
+    this.update = function (){
+      //reverse if border touched
+      if ((this.upBorder&&this.y<this.upBorder)||(this.downBorder&&this.y>this.downBorder)||(this.leftBorder&&this.x<this.leftBorder)||(this.rightBorder&&this.x>this.rightBorder)) {this.direction*=-1};
+    //------inherits method-----
+      parentUpdate.call(this);
 
-			// triggers
-			
-				if (this.trigger.x&&(this.x<=this.trigger.x)) {
-					this.direction = this.trigger.direction;
-					this.velocity = this.trigger.velocity;
-					this.fire = this.trigger.fire;
-				}
-				if (this.trigger.f&&(this.trigger.f<=frames)) {
-					this.direction = this.trigger.direction;
-					this.velocity = this.trigger.velocity;
-					this.fire = this.trigger.fire;
-				}
-				
-			// fire
-			if (this.fire&&Math.random()>0.99) {
-				enemyFire.apply(this);
-			}
 
-			// lifetime counter
-			this._counter++;
+      // triggers
+      
+        if (this.trigger.x&&(this.x<=this.trigger.x)) {
+          this.direction = this.trigger.direction;
+          this.velocity = this.trigger.velocity;
+          this.fire = this.trigger.fire;
+        }
+        if (this.trigger.f&&(this.trigger.f<=frames)) {
+          this.direction = this.trigger.direction;
+          this.velocity = this.trigger.velocity;
+          this.fire = this.trigger.fire;
+        }
+        
+      // fire
+      if (this.fire&&Math.random()>0.99) {
+        enemyFire.apply(this);
+      }
 
-		};
+    };
+    this.collision = function () {
+     this.hp -=1;
+     if (this.hp ==0) {
+        this.flag = DEAD;
+        score +=this.cost;
+        var expl_unit = new Moving_unit(s_enemyExp,5);
+        expl_unit.x = this.x-37;
+        expl_unit.y = this.y-37;
+        expl_unit.name = 'sign';
+        allObjects.push(expl_unit);
+     };
+    };
+    var parentDraw = this.draw;//------inherits update-----
+    this.draw = function (ctx) {
+    parentDraw.call(this, ctx);
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    ctx.font ='10px Georgia';
+    ctx.fillText(this.hp, this.x+this.width, this.y);
+    ctx.restore();
+    }
+  }
 
-	}
+ function Bullet_unit(s_unit, lifetime, direction, velocity) {
+    //------inherits Moving_unit-----
+    Moving_unit.apply(this, arguments);
+    this.name = 'bullet';
+    this.cost=0;
+    this.delay = 10;
+}
 
-	// function Sign_unit(s_unit, time, direction,velocity) {
-	// 			//------inherits Static_unit-----
-	// 	Static_unit.apply(this, arguments);
-	// 	this.name = 'sign';
-	// 	this.counter =0;
-	// 	this.frequency = 10;//Math.round(this.time/s_unit.length);
-	// 	this.flag = ACTIVE;
-	// 	this.direction = direction||NODIRECTION;
-	// 	this.velocity = velocity||3;
-	// 	this.time = time||5;
-	// 	this._start = frames;
-	// 	this.update = function (){
-	// 		//if (this.counter == s_unit.length) {this.flag = DEAD};
-	// 		if (frames-this._start >  this.time) {this.flag = DEAD};
-	// 		this.counter++;
-	// 		switch (this.direction) {
-	// 			case NODIRECTION: 
-	// 				break;
-	// 			case UP:
-	// 				this.y -= this.velocity;
-	// 				break;
-	// 			case DOWN:
-	// 				this.y += this.velocity;
-	// 				break;
-	// 			case LEFT:
-	// 				this.x -=this.velocity;
-	// 				break;
-	// 			case RIGHT:
-	// 				this.x += this.velocity;
-	// 		}
-
-	// 	}
-	// };
-	
+function eBullet_unit(s_unit, lifetime, direction, velocity) {
+    //------inherits Moving_unit-----
+    Moving_unit.apply(this, arguments);
+    this.name = 'enemyBullet';
+    this.hp=1;
+    this.collision = function () {
+           this.hp -=1;
+     if (this.hp ==0) {
+        this.flag = DEAD;
+        score +=this.cost;
+        var expl_unit = new Moving_unit(s_enemyExp,5);
+        expl_unit.x = this.x-37;
+        expl_unit.y = this.y-37;
+        expl_unit.name = 'sign';
+        allObjects.push(expl_unit);
+     };
+    };
+}
 
 
 //------------Level object-----------------------
-	function Level (lvl, static_sprite, enemy_sprite, bg_sprite, ammo_sprite) {
-		this.step=50;
-		this.static_sprite=static_sprite;
-		this.enemy_sprite=enemy_sprite;
-		this.bg_sprite=bg_sprite;
-		this.lvl=lvl;
-		this.init = function(){
-			var bg = new Static_unit(this.bg_sprite);
-			staticObjects.push(bg);
+  function Level (lvl, static_sprite, enemy_sprite, bg_sprite, ammo_sprite) {
+    this.step=50;
+    this.static_sprite=static_sprite;
+    this.enemy_sprite=enemy_sprite;
+    this.bg_sprite=bg_sprite;
+    this.lvl=lvl;
+    this.init = function(){
+      endCurrentLevel = this.lvl.length * this.step;
+      var bg = new Static_unit(this.bg_sprite);
+      staticObjects.push(bg);
 
-			for (var i=0; i<this.lvl.length; i++){
-				for (var j=this.lvl[i].length-1; j>=0; j--) {
-					if (this.lvl[i][j]=='s') {
-						var new_unit = new Static_unit(this.static_sprite);
-						new_unit.x = i*this.step;
-						new_unit.y = (this.lvl[i].length-1-j)*this.step;
-						allObjects.push(new_unit);
-					};
-					if (this.lvl[i][j]=='e') {
-						var new_unit = new Enemy_unit(this.enemy_sprite,0, UP);
-						new_unit.name = 'enemy';
-						new_unit.x = i*this.step;
-						new_unit.y = (this.lvl[i].length-1-j)*this.step;
-						//---find borders------
-						new_unit.upBorder = 0;
-						var q=j+1; while (this.lvl[i][q]=='0'){new_unit.upBorder++; q++}
-						new_unit.upBorder = new_unit.y + this.step - (new_unit.upBorder*this.step)
-						new_unit.downBorder = 0;
-						var q=j-1; while (this.lvl[i][q]=='0'){new_unit.downBorder++; q--}
-						new_unit.downBorder = new_unit.y + (new_unit.downBorder*this.step)
+      for (var i=0; i<this.lvl.length; i++){
+        for (var j=this.lvl[i].length-1; j>=0; j--) {
+          switch (this.lvl[i][j]) {
+            
+            case 's':
+            var new_unit = new Static_unit(this.static_sprite);
+            new_unit.x = i*this.step;
+            new_unit.y = (this.lvl[i].length-1-j)*this.step;
+            allObjects.push(new_unit);
+            break;
 
-						allObjects.push(new_unit);
-					};
-					if (this.lvl[i][j]=='f') {
-						var new_unit = new Enemy_unit(this.enemy_sprite, 0, LEFT);
-						new_unit.name = 'enemy';
-						new_unit.x = i*this.step;
-						new_unit.y = (this.lvl[i].length-1-j)*this.step;
-						allObjects.push(new_unit);
-					};
-					if (this.lvl[i][j]=='a') {
-						var new_unit = new Static_unit(ammo_sprite, 1000);
-						new_unit.name = 'ammo';
-						new_unit.x = i*this.step;
-						new_unit.y = (this.lvl[i].length-1-j)*this.step;
-						allObjects.push(new_unit);
-					};
+            case 'e':
+            var new_unit = new Enemy_unit(this.enemy_sprite,0, UP);
+            new_unit.name = 'enemy';
+            new_unit.x = i*this.step;
+            new_unit.y = (this.lvl[i].length-1-j)*this.step;
+            //---find borders------
+            new_unit.upBorder = 0;
+            var q=j+1; while (this.lvl[i][q]=='0'){new_unit.upBorder++; q++}
+            new_unit.upBorder = new_unit.y + this.step - (new_unit.upBorder*this.step)
+            new_unit.downBorder = 0;
+            var q=j-1; while (this.lvl[i][q]=='0'){new_unit.downBorder++; q--}
+            new_unit.downBorder = new_unit.y + (new_unit.downBorder*this.step)
+            allObjects.push(new_unit);
+            break;
 
+            case 'f':
+            var new_unit = new Enemy_unit(this.enemy_sprite, 0, LEFT);
+            new_unit.name = 'enemy';
+            new_unit.x = i*this.step;
+            new_unit.y = (this.lvl[i].length-1-j)*this.step;
+            allObjects.push(new_unit);
+            break;
 
-				}
-			}
-		};
-		this.update = function(){
-			
-		}
-
-
-	}
+            case 'a':
+            var new_unit = new Static_unit(ammo_sprite, 1000);
+            new_unit.name = 'ammo';
+            new_unit.x = i*this.step;
+            new_unit.y = (this.lvl[i].length-1-j)*this.step;
+            allObjects.push(new_unit);
+            break;
+          };
+        }
+      }
+    };
+    this.update = function(){
+      
+    }
+  }
 
 //------------GAME FUNCTIONS -----------------------
 
@@ -603,302 +296,334 @@ function init () {
 frames =0;
 allObjects=[];
 staticObjects=[];
-score = 0;
-ammo=50;
+
+if (gameState == PLAY) {
 
 //--------helicopter init--------------
 
+score = 0;
+ammo=50;
 
 var helicopter = new Static_unit(s_helic);
 helicopter.flag = ACTIVE;
+helicopter.hp=10;
 helicopter.y=300;
 helicopter.velocity = HSPEED;
 helicopter.acceleration = 0.25;
 helicopter.update = function (){
-	if (keystate[KEY_DOWN]||touchstate[DOWN]) {
-		helicopter.y+=helicopter.velocity;
-			helicopter.velocity += helicopter.acceleration;
-	};
-	if (keystate[KEY_UP] ||touchstate[UP]) {
-	helicopter.y-=helicopter.velocity;
-	helicopter.velocity += helicopter.acceleration;
-	};
-	if (keystate[KEY_RIGHT]) {
-		helicopter.x+=helicopter.velocity};
-	if (keystate[KEY_LEFT]) {
-	helicopter.x-=helicopter.velocity;
-	};
-	if (frames%5!=0) {return};
-	if (keystate[KEY_FIRE]||touchstate[FIRE]) {
-	fire();
-	};
-	if (!keystate['isPressed']) {
-		helicopter.velocity = HSPEED;
-	}
-	
+  if (keystate[KEY_DOWN]||touchstate[DOWN]) {
+    helicopter.y+=helicopter.velocity;
+      helicopter.velocity += helicopter.acceleration;
+  };
+  if (keystate[KEY_UP] ||touchstate[UP]) {
+  helicopter.y-=helicopter.velocity;
+  helicopter.velocity += helicopter.acceleration;
+  };
+  if (keystate[KEY_RIGHT]) {
+    helicopter.x+=helicopter.velocity};
+  if (keystate[KEY_LEFT]) {
+  helicopter.x-=helicopter.velocity;
+  };
+  if (frames%5!=0) {return};
+  if (keystate[KEY_FIRE]||touchstate[FIRE]) {
+  fire();
+  };
+  if (!keystate['isPressed']) {
+    helicopter.velocity = HSPEED;
+  }
+  
 }
+helicopter.collision = function () {
+     helicopter.hp -=1;
+     if (helicopter.hp ==0) {
+        helicopter.flag = DEAD;
+        var expl_unit = new Moving_unit(s_heliExp,20);
+        expl_unit.name = 'sign';
+        expl_unit.x = helicopter.x-50;
+        expl_unit.y = helicopter.y-50;
+        expl_unit.delay = 2;
+        allObjects.push(expl_unit);
+     };
+};
+
+var parentDraw = helicopter.draw;//------inherits update-----
+helicopter.draw = function (ctx) {
+parentDraw.call(helicopter, ctx);
+ctx.save();
+ctx.fillStyle = "#fff";
+ctx.font ='10px Georgia';
+ctx.fillText(helicopter.hp, helicopter.x+helicopter.width, helicopter.y);
+ctx.restore();
+};
 
 
 allObjects.push(helicopter);
 
-// var bg = new Static_unit(s_bg);
-// 			allObjects.push(bg);
 //--------level init-----
 var level1 = new Level(level_1,s_rock, s_enemy, s_bg, s_ammo);
 level1.init();
 
 var bg = new Static_unit(s_bg);
-			staticObjects.push(bg);
+      staticObjects.push(bg);
 
+};
+
+if (gameState == STARTMENU) {
+  startMenu();
+};
+
+if (gameState == FINALMENU) {
+  finalMenu();
+};
 
 };
 
 //-------------update&check all game elements---------------
 function update () {
-	frames++;
-	camera();
-	// update all objects
-	for (var i = 0; i < allObjects.length; i++) {
-		allObjects[i].update();
-		// clear bullets
-		if (allObjects[i].name=='bullet' && (allObjects[i].x >= G_WIDTH||allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
-		if (allObjects[i].name=='enemyBullet' && (allObjects[i].x >= G_WIDTH||allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
-	}
-	// moving forward
+  frames++;
+  camera();
 
-	for(var i=1; i<allObjects.length; i++) {
-				allObjects[i].x-=VELOCITY;
-			}
+  if (gameState != PLAY) {
+    for (var i = 0; i < allObjects.length; i++) {
+    allObjects[i].update();
+    };
+    return;
+  }
+  // update all objects
+  for (var i = 0; i < allObjects.length; i++) {
+    allObjects[i].update();
+    // clear bullets
+    if (allObjects[i].name=='bullet' && (allObjects[i].x >= G_WIDTH||allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
+    if (allObjects[i].name=='enemyBullet'&& (allObjects[i].x >= G_WIDTH||allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
+    if (allObjects[i].name=='enemy'&& (allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
+  }
 if (allObjects[0].flag!=DEAD) {
-	collisionCheck();
+  collisionCheck();
 
 };
 //  delete all dead
 for(var j=allObjects.length-1; j>0; j--) {
-					if (allObjects[j].flag ==DEAD) {
-						allObjects.splice(j,1)
-					}
+          if (allObjects[j].flag ==DEAD) {
+            allObjects.splice(j,1)
+          }
 }
 
+  // moving forward
 
+  for(var i=1; i<allObjects.length; i++) {
+        allObjects[i].x-=VELOCITY;
+      }
+  // mov end of level
+        endCurrentLevel-=VELOCITY;
 
-
-
+  // check end of level
+  if (allObjects[0].x > endCurrentLevel){
+    gameState= FINALMENU; 
+    init();
+  } 
 }
 
 //-------------draw all game elements----------------
 function render () {
-	// draw background color
-	ctx.fillRect(0, 0, G_WIDTH, G_HEIGHT);
+  // draw background color
+  ctx.fillRect(0, 0, G_WIDTH, G_HEIGHT);
 
-	// draw all objects
-		for (var i = 0; i < staticObjects.length; i++) {
-		staticObjects[i].draw(ctx);
-	};
+  // draw all objects
+    for (var i = 0; i < staticObjects.length; i++) {
+    staticObjects[i].draw(ctx);
+  };
 
-	for (var i = 1; i < allObjects.length; i++) {
-		allObjects[i].draw(ctx);
-	};
-	// draw helicopter above all
-	if (allObjects[0].flag!=DEAD) {
-		allObjects[0].draw(ctx);
-	};
+  for (var i = 1; i < allObjects.length; i++) {
+    allObjects[i].draw(ctx);
+  };
 
+  // draw helicopter above all
+  if (allObjects[0].flag!=DEAD) {
+    allObjects[0].draw(ctx);
+  };
 // score
-	ctx.save();
-	ctx.fillStyle = "#fff";
-	ctx.fillText("SCORE: " + score, 10, canvas.height-10);
-	ctx.fillText("AMMO: " + ammo, canvas.width-60, canvas.height-10);
-	ctx.restore();
+  if (gameState == PLAY) {
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    ctx.fillText("SCORE: " + score, 10, canvas.height-10);
+    ctx.fillText("AMMO: " + ammo, canvas.width-60, canvas.height-10);
+    ctx.restore();
+  }
+  if (gameState == FINALMENU) {
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    ctx.font ='30px Georgia';
+    ctx.fillText("BEST SCORE: " + best, 300, 180);
+    ctx.fillText("YOUR SCORE: " + score, 300, 220);
+
+    ctx.restore();
+  }
+
 }
 
 //----------------Game cycle--------------
 function loop () {
-	update();
-	render();
-	window.requestAnimationFrame(loop, canvas);
+  update();
+  render();
+  window.requestAnimationFrame(loop, canvas);
 };
 
 //----------------First start the game---------
 function run () {
-	// create and initiate the canvas element
-	canvas = document.createElement("canvas");
-	canvas.width = WIDTH;
-	canvas.height = HEIGHT;
-	ctx = canvas.getContext("2d");
-	// add the canvas element to the body of the document
-	canvas.style.border = "1px solid #000";
-	document.body.appendChild(canvas);
-		// keeps track of the keybourd input
-	document.addEventListener("keydown", function(evt) {
-		keystate[evt.keyCode] = true;
-		keystate['isPressed'] = true;
-		//console.log(evt.keyCode);
-	});
-	document.addEventListener("keyup", function(evt) {
-		delete keystate[evt.keyCode];
-		keystate['isPressed'] = false;
-	});
-	var evt1= "touchstart";
-	document.addEventListener("touchstart", touch);
-	document.addEventListener("touchend", function() {
-		touchstate[UP]=false;touchstate[DOWN]=false;touchstate[FIRE]=false;
-	});
+  // create and initiate the canvas element
+  canvas = document.createElement("canvas");
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  ctx = canvas.getContext("2d");
+  // add the canvas element to the body of the document
+  canvas.style.border = "1px solid #000";
+  document.body.appendChild(canvas);
+    // keeps track of the keybourd input
+  document.addEventListener("keydown", function(evt) {
+    keystate[evt.keyCode] = true;
+    keystate['isPressed'] = true;
+  });
+  document.addEventListener("keyup", function(evt) {
+    delete keystate[evt.keyCode];
+    keystate['isPressed'] = false;
+  });
+  var evt1= "touchstart";
+  document.addEventListener("touchstart", touch);
+  document.addEventListener("touchend", function() {
+    touchstate[UP]=false;touchstate[DOWN]=false;touchstate[FIRE]=false;
+  });
 
-	init();
-	loop();
-	
-
+  init();
+  loop();
 
 }
 //--- helicopter fires
 function fire() {
-	if (ammo>0) {
-		var bullet = new Moving_unit(s_bullet, 0,RIGHT, 50);
-		bullet.x = allObjects[0].x+ allObjects[0].width;
-		bullet.y = allObjects[0].y+0.5*allObjects[0].height;
-		bullet.name = 'bullet';
-		bullet.delay = 10;
-		allObjects.push(bullet);
-		ammo -=1;
-	}
+  if (ammo>0) {
+    var bullet = new Bullet_unit(s_bullet, 0,RIGHT, 50);
+    bullet.x = allObjects[0].x+ allObjects[0].width;
+    bullet.y = allObjects[0].y+0.5*allObjects[0].height;
+    allObjects.push(bullet);
+    ammo -=1;
+  }
 }
 
 function enemyFire() {
-		var bullet = new Moving_unit(s_missile, 0,LEFT, 8);
-		bullet.x = this.x;
-		bullet.y = this.y+0.5*this.height;
-		bullet.name = 'enemyBullet';
-		allObjects.push(bullet);
+    var bullet = new eBullet_unit(s_missile, 0,LEFT, 8);
+    bullet.x = this.x;
+    bullet.y = this.y+0.5*this.height;
+    bullet.name = 'enemyBullet';
+    allObjects.push(bullet);
 }
 
 
 //---- camera in dev mode
 function camera() {
-	var xcam=0, ycam=0;
-	if (keystate[CAM_DOWN]) {
-		ycam =10
-	};
-	if (keystate[CAM_UP]) {
-		ycam=-10;
-	};
-	if (keystate[CAM_RIGHT]) {
-		xcam=10;
-	};
-	if (keystate[CAM_LEFT]) {
-		xcam=-10;
-	};
-	GAME_X+=xcam;
-	GAME_Y+=ycam;
-	HEIGHT +=ycam;
-	WIDTH+=xcam;
-	for(var i=0; i<allObjects.length; i++) {
-				allObjects[i].x+=xcam;
-				allObjects[i].y+=ycam;
-				allObjects[i].upBorder+=ycam;
-				allObjects[i].downBorder+=ycam;
-	};
+  var xcam=0, ycam=0;
+  if (keystate[CAM_DOWN]) {
+    ycam =10
+  };
+  if (keystate[CAM_UP]) {
+    ycam=-10;
+  };
+  if (keystate[CAM_RIGHT]) {
+    xcam=10;
+  };
+  if (keystate[CAM_LEFT]) {
+    xcam=-10;
+  };
+  GAME_X+=xcam;
+  GAME_Y+=ycam;
+  HEIGHT +=ycam;
+  WIDTH+=xcam;
+  for(var i=0; i<allObjects.length; i++) {
+        allObjects[i].x+=xcam;
+        allObjects[i].y+=ycam;
+        allObjects[i].upBorder+=ycam;
+        allObjects[i].downBorder+=ycam;
+  };
 
 }
 
 function collisionCheck () {
-	// check for helicopter collision
-			for(var i=1; i<allObjects.length; i++) {
-				if (allObjects[i].name !='bullet'&& allObjects[i].name !='sign') { // check al except bullets
-					if (allObjects[i].x > allObjects[0].x) {
-						if ((allObjects[i].x- allObjects[0].x)<allObjects[0].width-25) {
-							if (allObjects[i].y> allObjects[0].y) {
-								if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height-15) {
-									heliDead();
-									
-								}
-							} else
-								if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height-15) {
-									heliDead();
-									
-							}
-						}
-		  		} else
-			  		if ((allObjects[0].x- allObjects[i].x)<allObjects[i].width-25) {
-								if (allObjects[i].y> allObjects[0].y) {
-									if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height-15) {
-										heliDead();
-										
-									}
-								} else
-									if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height-15) {
-										heliDead();
-										
-								}
-					}
-				} else
-				if (allObjects[i].name =='bullet') {
-		
-	// check for bullet collision
-				for(var j=1; j<allObjects.length; j++) {
-					if (allObjects[j].name !='bullet' && allObjects[j].name !='sign'&& allObjects[j].name !='ammo') {
-						if ((allObjects[i].y>allObjects[j].y)&&(allObjects[i].y<(allObjects[j].y +allObjects[j].height))){
-								if ((allObjects[i].x > allObjects[j].x)&& ((allObjects[i].x - allObjects[j].x)< allObjects[j].width)) {
-										allObjects[i].flag=DEAD;
-										if (allObjects[j].flag!=CONST) {
-											allObjects[j].flag=DEAD;
-											score +=1;
-											if (allObjects[j].name == 'enemy'||allObjects[j].name == 'enemyBullet') {
-												var expl_unit = new Moving_unit(s_enemyExp,5);
-												expl_unit.x = allObjects[j].x-37;
-												expl_unit.y = allObjects[j].y-37;
-												expl_unit.name = 'sign';
-												//expl_unit.delay=2;
-												allObjects.push(expl_unit);
-											};
-										};
-											//console.log('SHOOT');
-								};
-						};
-					};
-				};
-			};
-			};
+  // check for helicopter collision
+      for(var i=1; i<allObjects.length; i++) {
+        if (allObjects[i].name !='bullet'&& allObjects[i].name !='sign') { // check al except bullets
+          if (allObjects[i].x > allObjects[0].x) {
+            if ((allObjects[i].x- allObjects[0].x)<allObjects[0].width-25) {
+              if (allObjects[i].y> allObjects[0].y) {
+                if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height-15) {
+                  heliDead();
+                }
+              } else
+                if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height-15) {
+                  heliDead();
+              }
+            }
+          } else
+          if ((allObjects[0].x- allObjects[i].x)<allObjects[i].width-25) {
+            if (allObjects[i].y> allObjects[0].y) {
+              if ((allObjects[i].y- allObjects[0].y)<allObjects[0].height-15) {
+                heliDead();
+              }
+            } else
+            if ((allObjects[0].y- allObjects[i].y)<allObjects[i].height-15) {
+              heliDead();
+            }
+          }
+        } else
+        if (allObjects[i].name =='bullet') {
+    
+  // check for bullet collision
+        for(var j=1; j<allObjects.length; j++) {
+          if (allObjects[j].name !='bullet' && allObjects[j].name !='sign'&& allObjects[j].name !='ammo') {
+            if ((allObjects[i].y>allObjects[j].y)&&(allObjects[i].y<(allObjects[j].y +allObjects[j].height))){
+              if ((allObjects[i].x > allObjects[j].x)&& ((allObjects[i].x - allObjects[j].x)< allObjects[j].width)) {
+                allObjects[i].collision();
+                if (allObjects[j].flag!=CONST) {
+                  allObjects[j].collision();
+                  
+                  // if (allObjects[j].name == 'enemy'||allObjects[j].name == 'enemyBullet') {
+                  //   var expl_unit = new Moving_unit(s_enemyExp,5);
+                  //   expl_unit.x = allObjects[j].x-37;
+                  //   expl_unit.y = allObjects[j].y-37;
+                  //   expl_unit.name = 'sign';
+                  //   //expl_unit.delay=2;
+                  //   allObjects.push(expl_unit);
+                  // };
+                };
+              };
+            };
+          };
+        };
+      };
+      };
 
-// delete all dead
-// for(var j=allObjects.length-1; j>0; j--) {
-// 					if (allObjects[j].flag ==DEAD) {
-// 						allObjects.splice(j,1)
-// 					}
-// }
+  function heliDead(){
+    allObjects[i].flag = DEAD;
+    if (allObjects[i].name=='ammo') {
+      ammo+=50;
+      return;
+    }
 
-function heliDead(){
-	allObjects[i].flag = DEAD;
-	if (allObjects[i].name=='ammo') {
-		ammo+=50;
-		return;
-	}
-
-	var expl_unit = new Moving_unit(s_heliExp,20);
-	expl_unit.name = 'sign';
-	expl_unit.x = allObjects[0].x-50;
-	expl_unit.y = allObjects[0].y-50;
-	expl_unit.delay = 2;
-	allObjects.push(expl_unit);
-	allObjects[0].flag=DEAD;
-
-
-// var end = new Movin_unit(s_end);
-// end.x= 200;
-// end.y = 180;
-
-// 	allObjects[0] = end;
-setTimeout(init,1000);
-
-	}
-
-
+    // var expl_unit = new Moving_unit(s_heliExp,20);
+    // expl_unit.name = 'sign';
+    // expl_unit.x = allObjects[0].x-50;
+    // expl_unit.y = allObjects[0].y-50;
+    // expl_unit.delay = 2;
+    // allObjects.push(expl_unit);
+    // allObjects[0].flag=DEAD;
+    allObjects[0].collision();
+    if (allObjects[0].flag == DEAD) {
+      setTimeout(function () { gameState= FINALMENU; init()},1000);
+    };
+  }
 }
 // for touchscreen fun
 function touch(evt) {
-	widthTouch = window.innerWidth;
+  widthTouch = window.innerWidth;
   heightTouch = window.innerHeight;
-	var mx = evt.offsetX, my = evt.offsetY;
+  var mx = evt.offsetX, my = evt.offsetY;
       if (mx == null || my == null) {
         mx = evt.touches[0].clientX;
         my = evt.touches[0].clientY;
@@ -907,14 +632,14 @@ function touch(evt) {
       if (0 < mx && mx < widthTouch/2 &&
         0 < my && my < heightTouch/2
       ) {
-      	touchstate[UP] = true;
+        touchstate[UP] = true;
       }
-			if (0 < mx && mx < widthTouch/2 &&
+      if (0 < mx && mx < widthTouch/2 &&
         heightTouch/2< my && my < heightTouch
       ) {
         touchstate[DOWN] = true;
       }
-			if ((widthTouch/2 < mx && mx < widthTouch &&
+      if ((widthTouch/2 < mx && mx < widthTouch &&
         0< my && my < heightTouch
       )||(widthTouch/2 < evt.touches[1].clientX && evt.touches[1].clientX < widthTouch &&
         0< evt.touches[1].clientY && evt.touches[1].clientY < heightTouch
@@ -924,6 +649,56 @@ function touch(evt) {
       }
 }
 
+function startMenu () {
+  var menu = new Static_unit (s_start);
+  menu.x=0;
+  menu.y=0;
+  var pointer = new Static_unit (s_missile);
+  pointer.x = 600;
+  pointer.y = 300;
+  pointer.update = function (){
+  if (keystate[KEY_DOWN]||touchstate[DOWN]) {
+    pointer.y+= pointer.y ==370? 0:70;
+  };
+  if (keystate[KEY_UP] ||touchstate[UP]) {
+    pointer.y-= pointer.y ==300? 0:70;
+  };
+  if (keystate[KEY_FIRE]||touchstate[FIRE]) {
+      if (pointer.y ==300) {gameState = PLAY; init();}
+      else {window.close();};
+  };
+
+  }
+  allObjects.push (pointer);
+  allObjects.push (menu);
+}
+
+function finalMenu () {
+  var menu = new Static_unit (s_start);
+  menu.x=0;
+  menu.y=0;
+  var pointer = new Static_unit (s_missile);
+  pointer.x = 600;
+  pointer.y = 300;
+  pointer.update = function (){
+  if (keystate[KEY_DOWN]||touchstate[DOWN]) {
+    pointer.y+= pointer.y ==370? 0:70;
+  };
+  if (keystate[KEY_UP] ||touchstate[UP]) {
+    pointer.y-= pointer.y ==300? 0:70;
+  };
+  if (keystate[KEY_FIRE]||touchstate[FIRE]) {
+      if (pointer.y ==300) {gameState = PLAY; init();}
+      else {window.close();};
+  };
+
+  }
+  allObjects.push (pointer);
+  allObjects.push (menu);
+
+  best = Math.max(best, score);
+  localStorage.setItem("helicopterBest", best);
+}
 
 window.onload = start;
 
@@ -932,6 +707,6 @@ initSprites();
 run();
 };
 
-	</script>
+  </script>
 </body>
 </html>
