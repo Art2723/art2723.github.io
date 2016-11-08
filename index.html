@@ -205,7 +205,7 @@ ammo;
     this.name = 'bullet';
     this.cost=0;
     this.delay = 10;
-}
+};
 
 function eBullet_unit(s_unit, lifetime, direction, velocity) {
     //------inherits Moving_unit-----
@@ -579,7 +579,8 @@ function collisionCheck () {
           if (allObjects[j].name !='bullet' && allObjects[j].name !='sign'&& allObjects[j].name !='ammo') {
             if ((allObjects[i].y>allObjects[j].y)&&(allObjects[i].y<(allObjects[j].y +allObjects[j].height))){
               if ((allObjects[i].x > allObjects[j].x)&& ((allObjects[i].x - allObjects[j].x)< allObjects[j].width)) {
-                allObjects[i].collision();
+                
+                allObjects[i].flag=DEAD;
                 if (allObjects[j].flag!=CONST) {
                   allObjects[j].collision();
                   
