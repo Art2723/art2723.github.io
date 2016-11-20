@@ -578,11 +578,13 @@ function camera() {
   GAME_Y+=ycam;
   HEIGHT +=ycam;
   WIDTH+=xcam;
+  if(ycam||xcam) {
   for(var i=0; i<allObjects.length; i++) {
         allObjects[i].x+=xcam;
         allObjects[i].y+=ycam;
         allObjects[i].upBorder+=ycam;
         allObjects[i].downBorder+=ycam;
+  }
   };
 
 }
