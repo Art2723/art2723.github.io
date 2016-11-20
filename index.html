@@ -155,12 +155,12 @@ ammo;
     this.hp = 4;
     this.damage = 2;
     this.fire = Math.random()>0.5?1:0;
-    this.trigger = {x:Math.random()>0.6?Math.round(Math.random()*300):0,
-                    f:Math.random()>0.6?Math.round(Math.random()*1000):0,
-                    direction:LEFT,
-                    velocity:6,
-                    fire:Math.random()>0.5?1:0
-                     }
+    //this.trigger = {x:Math.random()>0.6?Math.round(Math.random()*300):0,
+                    // f:Math.random()>0.6?Math.round(Math.random()*1000):0,
+                    // direction:LEFT,
+                    // velocity:6,
+                    // fire:Math.random()>0.5?1:0
+                    //  }
   };
    // inheretance
   Enemy_unit.prototype = Object.create(Moving_unit.prototype);
@@ -176,16 +176,16 @@ ammo;
 
       // triggers
       
-        if (this.trigger.x&&(this.x<=this.trigger.x)) {
-          this.direction = this.trigger.direction;
-          this.velocity = this.trigger.velocity;
-          this.fire = this.trigger.fire;
-        }
-        if (this.trigger.f&&(this.trigger.f<=frames)) {
-          this.direction = this.trigger.direction;
-          this.velocity = this.trigger.velocity;
-          this.fire = this.trigger.fire;
-        }
+        // if (this.trigger.x&&(this.x<=this.trigger.x)) {
+        //   this.direction = this.trigger.direction;
+        //   this.velocity = this.trigger.velocity;
+        //   this.fire = this.trigger.fire;
+        // }
+        // if (this.trigger.f&&(this.trigger.f<=frames)) {
+        //   this.direction = this.trigger.direction;
+        //   this.velocity = this.trigger.velocity;
+        //   this.fire = this.trigger.fire;
+        // }
         
       // fire
       if (this.fire&&Math.random()>0.99) {
@@ -411,7 +411,7 @@ if (gameState == FINALMENU) {
 //-------------update&check all game elements---------------
 function update () {
   frames++;
-  camera();
+  //camera();
   if (gameState==PAUSE) return;
 
   if (gameState != PLAY) {
