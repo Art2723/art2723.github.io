@@ -423,6 +423,7 @@ function update () {
   // update all objects
   for (var i = 0; i < allObjects.length; i++) {
     allObjects[i].update();
+    if (i) {allObjects[i].x-=VELOCITY};
     // clear bullets
     if (allObjects[i].name=='bullet' && (allObjects[i].x >= G_WIDTH||allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
     if (allObjects[i].name=='enemyBullet'&& (allObjects[i].x >= G_WIDTH||allObjects[i].x <= 0)) {allObjects[i].flag=DEAD};
@@ -442,9 +443,9 @@ for(var j=allObjects.length-1; j>0; j--) {
 
   // moving forward
 
-  for(var i=1; i<allObjects.length; i++) {
-        allObjects[i].x-=VELOCITY;
-      }
+  // for(var i=1; i<allObjects.length; i++) {
+  //       allObjects[i].x-=VELOCITY;
+  //     }
   // mov end of level
         endCurrentLevel-=VELOCITY;
 
