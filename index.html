@@ -468,12 +468,18 @@ function render () {
   ctx.fillRect(0, 0, G_WIDTH, G_HEIGHT);
 
   // draw all objects
-    for (var i = 0; i < staticObjects.length; i++) {
-    staticObjects[i].draw(ctx);
+  for (var i = 0; i < staticObjects.length; i++) {
+    if (staticObjects[i].x<=G_WIDTH&& staticObjects[i].x> -200) {
+      staticObjects[i].draw(ctx);
+    }
   };
 
   for (var i = 1; i < allObjects.length; i++) {
-    allObjects[i].draw(ctx);
+    if (allObjects[i].x<=G_WIDTH&& allObjects[i].x> -200) {
+      allObjects[i].draw(ctx);
+    }
+
+    //allObjects[i].draw(ctx);
   };
 
   // draw helicopter above all
