@@ -216,11 +216,11 @@ function qRand() {
     //var parentDraw = this.draw;//------inherits update-----
     Enemy_unit.prototype.draw = function (ctx) {
     Moving_unit.prototype.draw.call(this, ctx);
-    // ctx.save();
-    // ctx.fillStyle = "#fff";
-    // ctx.font ='10px Georgia';
-    // ctx.fillText(this.hp, this.x+this.width, this.y);
-    // ctx.restore();
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    ctx.font ='10px Georgia';
+    ctx.fillText(this.hp, this.x+this.width, this.y);
+    ctx.restore();
     }
   
 
@@ -385,11 +385,11 @@ helicopter.collision = function (dmg) {
 var parentDraw = helicopter.draw;//------inherits update-----
 helicopter.draw = function (ctx) {
 parentDraw.call(helicopter, ctx);
-// ctx.save();
-// ctx.fillStyle = "#fff";
-// ctx.font ='10px Georgia';
-// ctx.fillText(helicopter.hp, helicopter.x+helicopter.width, helicopter.y);
-// ctx.restore();
+ctx.save();
+ctx.fillStyle = "#fff";
+ctx.font ='10px Georgia';
+ctx.fillText(helicopter.hp, helicopter.x+helicopter.width, helicopter.y);
+ctx.restore();
 };
 
 
