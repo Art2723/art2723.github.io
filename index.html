@@ -66,6 +66,14 @@ score,
 best = localStorage.getItem("helicopterBest")|| 0,
 ammo;
 
+// --- random functions (speedups game)
+for (var i=1e6, lookupTable=[]; i--;) {
+  lookupTable.push(Math.random());
+}
+function qRand() {
+  return ++i >= lookupTable.length ? lookupTable[i=0] : lookupTable[i];
+}
+
 
 //------------Static_unit object--------------
   function Static_unit(s_unit) {
@@ -154,13 +162,13 @@ ammo;
     this.rightBorder = 0;
     this.hp = 4;
     this.damage = 2;
-    this.fire = Math.random()>0.5?1:0;
-    //this.trigger = {x:Math.random()>0.6?Math.round(Math.random()*300):0,
-                    // f:Math.random()>0.6?Math.round(Math.random()*1000):0,
-                    // direction:LEFT,
-                    // velocity:6,
-                    // fire:Math.random()>0.5?1:0
-                    //  }
+    this.fire = qRand()>0.5?1:0;
+    this.trigger = {x:qRand()>0.6?qRand(qRand()*300):0,
+                    f:qRand()>0.6?qRand(qRand()*1000):0,
+                    direction:LEFT,
+                    velocity:6,
+                    fire:qRand()>0.5?1:0
+                     }
   };
    // inheretance
   Enemy_unit.prototype = Object.create(Moving_unit.prototype);
@@ -176,19 +184,19 @@ ammo;
 
       // triggers
       
-        // if (this.trigger.x&&(this.x<=this.trigger.x)) {
-        //   this.direction = this.trigger.direction;
-        //   this.velocity = this.trigger.velocity;
-        //   this.fire = this.trigger.fire;
-        // }
-        // if (this.trigger.f&&(this.trigger.f<=frames)) {
-        //   this.direction = this.trigger.direction;
-        //   this.velocity = this.trigger.velocity;
-        //   this.fire = this.trigger.fire;
-        // }
+        if (this.trigger.x&&(this.x<=this.trigger.x)) {
+          this.direction = this.trigger.direction;
+          this.velocity = this.trigger.velocity;
+          this.fire = this.trigger.fire;
+        }
+        if (this.trigger.f&&(this.trigger.f<=frames)) {
+          this.direction = this.trigger.direction;
+          this.velocity = this.trigger.velocity;
+          this.fire = this.trigger.fire;
+        }
         
       // fire
-      if (this.fire&&Math.random()>0.99) {
+      if (this.fire&&qRand()>0.99) {
         enemyFire.apply(this);
       }
 
